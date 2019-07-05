@@ -68,7 +68,9 @@ class _MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: new AppBar(
+        centerTitle:true,
         title: new Text("Cryptocurrency"),
+        elevation:0.0,
 
       ),
       body: _cryptoWidget(),
