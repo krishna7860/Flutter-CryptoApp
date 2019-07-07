@@ -4,16 +4,14 @@ import 'MainPage.dart';
 import 'dart:convert';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+
+import 'dependency_injection.dart';
 void main() async{
-  List currencies = await getCurrencies();
-  print(currencies);
 
-
-  runApp(new HomePage(currencies));}
+  Injector.configure(Flavour.SERVER);
+  runApp(new HomePage());}
 
 class HomePage extends StatelessWidget {
-  final List _currencies;
-  HomePage(this._currencies);
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -21,14 +19,9 @@ class HomePage extends StatelessWidget {
         primarySwatch: Colors.amber,
         primaryColor: defaultTargetPlatform == TargetPlatform.android ? Colors.grey[100] : null,
 
+
       ),
-      home: new MainPage(_currencies),
+      home: new MainPage(),
     );
   }
-}
-Future<List> getCurrencies() async{
-  String cryptoURL="https://api.coinmarketcap.com/v1/ticker/?limit=50";
-  http.Response response = await http.get(cryptoURL);
-  return json.decode(response.body);
-
 }

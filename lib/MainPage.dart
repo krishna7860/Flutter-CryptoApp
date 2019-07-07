@@ -3,15 +3,28 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
+
+import 'Modules/crypto_presenter.dart';
+import 'data/crypto_data.dart';
 class MainPage extends StatefulWidget {
-  final List currencies;
-  MainPage(this.currencies);
   @override
   _MainPageState createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends State<MainPage> implements CryptoListViewContract{
+    CryptoListPresenter _cryptoListPresenter;
+    List<Crypto> currencies;
+    bool _isloading = true;
+    _MainPageState(){
+      _cryptoListPresenter = new CryptoListPresenter(this);
+    }
 
+    @override
+    void initState() {
+    // TODO: implement initState
+    super.initState();
+    _cryptoListPresenter.loadCurrencies();
+  }
 
    final List<MaterialColor> _colors = [Colors.blue,Colors.indigo,Colors.deepOrange,Colors.red];
 
@@ -22,27 +35,48 @@ class _MainPageState extends State<MainPage> {
           children: <Widget>[
             new Flexible(
                 child:new ListView.builder(itemBuilder:(BuildContext context, int index){
-                  final Map currency= widget.currencies[index];
+                  final Crypto currency= currencies[index];
                   final MaterialColor color= _colors[index % _colors.length];
                   return _getUI(currency,color);
                 },
-                  itemCount:widget.currencies.length,
+                  itemCount:currencies.length,
+
                 )
+            ),
+            new BottomAppBar(
+              color: Colors.grey[100],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.home, color: Colors.black45),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.settings, color: Colors.black45),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.info, color: Colors.black45),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
             ),
           ],
         ),
       );
   }
-  ListTile _getUI(Map currency,MaterialColor color){
+  ListTile _getUI(Crypto currency,MaterialColor color){
    return new ListTile(
      leading: new CircleAvatar(
        backgroundColor:color,
-       child:new Text(currency["name"][0]),
+       child:new Text(currency.name[0]),
      ),
-     title: new Text(currency["name"],style: new TextStyle(
+     title: new Text(currency.name,style: new TextStyle(
        fontWeight: FontWeight.bold,
      ),),
-     subtitle:_getSubtitleText(currency["price_usd"],currency["percent_change_1h"]),
+     subtitle:_getSubtitleText(currency.price_usd,currency.percent_change_1h),
      isThreeLine: true,
    );
   }
@@ -70,12 +104,26 @@ class _MainPageState extends State<MainPage> {
       appBar: new AppBar(
         centerTitle:true,
         title: new Text("Cryptocurrency"),
-        elevation:0.0,
+
 
       ),
-      body: _cryptoWidget(),
+      body:_isloading ? new Center(child: new CircularProgressIndicator(),): _cryptoWidget(),
     );
   }
+
+  @override
+  void onLoadComplete(List<Crypto> items) {
+        setState(() {
+          currencies = items;
+          _isloading=false;
+        });
+  }
+
+  @override
+  void onLoadCryptoError() {
+
+  }
+
 
 
 }
